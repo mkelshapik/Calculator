@@ -1,6 +1,7 @@
 package com.shapovalov.calculator.ui.main
 
 import Calculator
+import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -9,11 +10,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.content.edit
 import com.shapovalov.calculator.R
 
 class MainFragment : Fragment() {
 
-    val resultTextView: AppCompatTextView by lazy {
+    private val sharedPreferences by lazy {
+        requireContext().getSharedPreferences(
+            PREFERENCES_DESCRIPTOR,
+            Context.MODE_PRIVATE
+        )
+    }
+
+    private val resultTextView: AppCompatTextView by lazy {
         requireView().findViewById(R.id.result_text_view)
     }
     var expression = ""
@@ -98,7 +107,21 @@ class MainFragment : Fragment() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        expression = sharedPreferences.getString(KEY, "")!!
+    }
+
+    override fun onStop() {
+        sharedPreferences.edit(true) {
+            putString(KEY, expression)
+        }
+        super.onStop()
+    }
+
     companion object {
+        private const val KEY = "expression"
+        private const val PREFERENCES_DESCRIPTOR = "calculator.expression"
         fun newInstance() = MainFragment()
     }
 }
